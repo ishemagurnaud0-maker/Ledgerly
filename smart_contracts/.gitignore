@@ -1,0 +1,17 @@
+*.env
+node_modules
+build
+artifacts
+cache
+coverage
+dist
+*.log
+*.tsbuildinfo
+*.js
+
+*.map 
+vscode/                                  
+
+
+
+
