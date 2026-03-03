@@ -16,28 +16,29 @@ interface TransactionContextType{
     }
     handleChange:(e: React.ChangeEvent<HTMLInputElement>, name: string) => void;
     sendTransaction: () =>Promise<void>;
+    
+    
 }
 export const TransactionConnect = React.createContext<TransactionContextType>({} as TransactionContextType);
 
 // Function to get the Ethereum contract instance
 const getEthereumContract = async() =>{
 
-    try{
+    
         const provider = new ethers.BrowserProvider(window.ethereum)
          const signer = await provider.getSigner();
          const transactionContract = new ethers.Contract(contractAddress, contractAbi, signer);
 
          console.log({ 
             provider,
-            signer,
+            signer, 
             transactionContract
         });
 
 
     return transactionContract;
-    } catch(err){
-        console.error("Error occurred while connecting to the contract",err);
-    }
+
+    
    }
 
 
@@ -46,6 +47,7 @@ const getEthereumContract = async() =>{
         // Component to provide the transaction context to the application
     const TransactionProvider = ({children}:{children:React.ReactNode}) => {
     const [currentAccount, setCurrentAccount] = useState<string>("");
+    const [transactionCount,setTransactionCount] = useState<number>(Number(localStorage.getItem('transactionCount') || 0));
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [formData, setFormData] = useState({
         addressTo: "",
@@ -53,6 +55,7 @@ const getEthereumContract = async() =>{
         keyword: "",
         message: ""
     });
+
 
 
 
@@ -94,7 +97,7 @@ const getEthereumContract = async() =>{
                                 from:currentAccount,
                                 to:addressTo,
                                 gas:'0x5208', //21000 Gwei
-                                value:parsedAmount.toString(),
+                                value:"0x" + parsedAmount.toString(16),
                             }]
 
                         });
@@ -109,6 +112,9 @@ const getEthereumContract = async() =>{
                           await transactionHash.wait();
                         setIsLoading(false);
                         console.log(`Success - ${transactionHash.hash}`);
+
+                        const transactionCount = await transactionContract.getTransactionCount();
+                        setTransactionCount(transactionCount.toNumber());
 
                 }
                 catch(err){

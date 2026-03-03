@@ -27,8 +27,10 @@ className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white bor
 const Welcome = () => {
 const{connectMyWallet} = useContext(TransactionConnect);
 const {currentAccount} = useContext(TransactionConnect);
+const {sendTransaction} = useContext(TransactionConnect);
 
-const [isLoading,setIsLoading] = useState(false);
+
+const [isLoading,setIsLoading] = useState<boolean>(false);
 const [formData,setFormData] = useState({
   addressTo: "",
    amount: "",
@@ -39,6 +41,25 @@ const {addressTo,amount,keyword,message} = formData;
 
  const handleChange = (e: React.ChangeEvent<HTMLInputElement>, name: string) => {
     setFormData((prevState)=>({...prevState, [name]:e.target.value}));
+  }
+
+  const handleSubmit =async (e: React.FormEvent<HTMLFormElement>) => {
+    try{
+      const {addressTo,amount,keyword,message} = formData;
+      e.preventDefault();
+    
+
+    if(!addressTo || !amount || !keyword || !message) return;
+
+   await sendTransaction();
+   
+  }catch(err){
+    console.log("Transaction failed to follow through,try again",err);
+  }
+  finally{
+    setIsLoading(false);
+  }
+    
   }
    
 return (
@@ -58,7 +79,7 @@ return (
           {!currentAccount && (<button
               type="button"
               onClick={connectMyWallet}
-              className="flex flex-row justify-center items-center my-5 bg-[#2952e3] hover:bg-[#2546bd] text-white font-size-400 py-2  rounded-full cursor-pointer w-150">
+              className="flex flex-row justify-center items-center my-5 bg-[#2952e3] hover:bg-[#2546be] transition-5s text-white font-size-400 py-2  rounded-full cursor-pointer w-150">
             
               <p className="text-white text-base font-semibold">Connect Wallet</p>
             </button>)}
@@ -105,7 +126,8 @@ return (
                   </div>
                     
               </div>
-              <div className="p-5 sm:w-96 w-full flex flex-col justify-start items-center blue-glassmorphism">
+              
+              <form className="p-5 sm:w-96 w-full flex flex-col justify-start items-center blue-glassmorphism">
                   <Input placeholder={"Address To"} name="addressTo" value={addressTo} type="text" onChange={handleChange}/>
                   <Input placeholder="Amount (ETH)" name="amount" type="number" value={amount} step="0.0001" onChange={handleChange} />
                   <Input placeholder="Keyword (Gif)" name="keyword" type="text" value={keyword} onChange={handleChange}  />
@@ -114,8 +136,8 @@ return (
                   
                   {isLoading ? (
                     <Loader />
-                  ) : (<button type="button" onClick={() => setIsLoading(true)} className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] rounded-full cursor-pointer">Send Now</button>)}
-              </div>
+                  ) : (<button type="submit" onClick={() => {setIsLoading(true); handleSubmit;}} className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] rounded-full cursor-pointer">Send Now</button>)}
+              </form>
 
             </div>
 
@@ -123,7 +145,6 @@ return (
         </div>
       </div>
     </>
-  )
-}
+  )}
 
 export default Welcome
