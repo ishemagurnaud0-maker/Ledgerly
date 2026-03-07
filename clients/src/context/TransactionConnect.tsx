@@ -102,7 +102,7 @@ const getEthereumContract = async() =>{
                                 from:currentAccount,
                                 to:addressTo,
                                 gas:'0x5208', //21000 Gwei
-                                value:parsedAmount.toString(),
+                                value:parsedAmount.toString(16),
                             }]
 
                         });
