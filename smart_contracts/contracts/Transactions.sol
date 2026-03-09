@@ -33,6 +33,12 @@ event TransactionAdded(address from, address receiver, uint amount, string messa
   function getTransactionCount() public view returns(uint256){
     return TransactionCount;
   }
+  function getLatestTransaction() public view returns(TransferStruct memory){
+    require(TransactionCount > 0, "No transactions found");
+    return transactions[TransactionCount - 1];
+  }
+
+      
 
 }
 
