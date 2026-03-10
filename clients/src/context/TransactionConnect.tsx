@@ -56,7 +56,21 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
     });
 
 
+           const getAllTransactions = async() => {
+            try{
+                    if(!window.ethereum) throw new Error ('No Metamask wallet found, please install one.');
+                
+                const transactionContract = await getEthereumContract();
+                if(transactionContract == null) throw new Error('Failed to connect to the contract instance.');
 
+                const availableTransactions = await transactionContract.getAllTransactions();
+                console.log('Available transactions:', availableTransactions);
+
+                const structuredTransactions = availableTransactions.map((transaction:any) => ({}))
+            } catch(err) {
+                console.error("Error occurred while fetching transactions:", err);
+            }
+           } 
 
     const checkIfWalletIsConnected = async() => {
                 try{
@@ -64,13 +78,13 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
 
                          const accounts = await window.ethereum.request({method:"eth_accounts"});
                      if(accounts.length === 0){
-                         console.log("No accounts connect yet. Please connect your wallet.");
+                         console.log("No accounts connected yet. Please connect your wallet.");
                             return;
                      }
                      else{
                         setCurrentAccount(accounts[0]);
                         console.log("Account connected:", accounts[0]);
-
+                        getAllTransactions();
                      }
                          return;
         }
@@ -91,6 +105,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
                     window.localStorage.setItem('transactionCount',transactionCount)
                 }catch(err){
                     console.error("Error occurred while checking transaction existence:",err);
+                    throw new Error("Failed to check transaction existence");
                 }
             }
             
@@ -128,7 +143,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
                         if(!ethers.isAddress(addressTo)) throw new Error("Invalid recipient address.");
                         if(Number(amount) > Number(balance)){
                             console.log('Insufficient balance to perform the transaction.');
-                            alert('Insufficient balance to perform the transaction.');
+                            alert('Insufficient funds to perform the transaction.');
                             return;
                         }
 
@@ -188,6 +203,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
             }
     useEffect(() =>{
         checkIfWalletIsConnected();
+        checkIfTransactionExist();
          
     },[])
     
