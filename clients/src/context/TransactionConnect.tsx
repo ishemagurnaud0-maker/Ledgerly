@@ -17,7 +17,11 @@ interface TransactionContextType{
     handleChange:(e: React.ChangeEvent<HTMLInputElement>, name: string) => void;
     sendTransaction: () =>Promise<void>;
     isLoading: boolean;
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     transactions:any[];
+    isLoggedOut: boolean;
+    setIsLoggedOut: React.Dispatch<React.SetStateAction<boolean>>;
+    disconnectWallet: () => void;
     
 
 }
@@ -60,6 +64,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
     });
     const [transactionCount,setTransactionCount] =useState(localStorage.getItem('transactionCount') || '0');
     const [transactions,setTransactions] = useState<any[]>([]);
+    const [isLoggedOut, setIsLoggedOut] = useState<boolean>(false);
 
 // Function to fetch all transactions from the blockchain
            const getAllTransactions = async() => {
@@ -75,10 +80,10 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
                 const structuredTransactions = availableTransactions.map((transaction:any) => ({
                     addressTo : transaction.receiver,
                     addressFrom : transaction.sender,
-                    timestamp : new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
+                    timestamp : new Date(Number(transaction.timestamp* 1000)).toLocaleString(),
                     message : transaction.message,
                     keyword : transaction.keyword,
-                    amount : parseInt(transaction.amount._hex) / (10 ** 18)
+                    amount : parseFloat(ethers.formatEther(transaction.amount)),
                 }))
                 console.log('Structured transactions:', structuredTransactions);
                 if(structuredTransactions.length === 0){
@@ -122,7 +127,8 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
 
                     const transactionCount = await transactionContract.getTransactionCount();
 
-                    window.localStorage.setItem('transactionCount',transactionCount)
+                    window.localStorage.setItem('transactionCount',transactionCount.toString())
+                    setTransactionCount(transactionCount.toString());
                 }catch(err){
                     console.error("Error occurred while checking transaction existence:",err);
                     throw new Error("Failed to check transaction existence");
@@ -150,7 +156,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
 
             //Function to send a transaction to the blockchain
 
-            const sendTransaction = async() =>{
+            const sendTransaction = async() => {
                 const {addressTo, amount, keyword, message} = formData;
                 const balance = await checkAccountBalance();
                 
@@ -187,13 +193,16 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
                         
 
                         if(transactionContract == null) throw new Error('Failed to connect to the contract instance.');
-
+                            setIsLoading(true);
                           const transactionHash = await transactionContract.addToBlockChain(addressTo,parsedAmount,message,keyword);
-                          setIsLoading(true);
+                          
                             console.log(`Loading - ${transactionHash.hash}`);
                           await transactionHash.wait();
                         setIsLoading(false);
                         console.log(`Success - ${transactionHash.hash}`);
+
+                        await getAllTransactions();
+                        await checkIfTransactionExist();
 
                 }
                 catch(err:any){
@@ -218,18 +227,27 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
                     console.log("Wallet connected:", accounts[0]);
 
                     setCurrentAccount(accounts[0]);
+                    await getAllTransactions();
                 }catch(err){
                     console.error("Error occurred while connecting to the wallet:",err);
                 }
             }
+
+            const disconnectWallet = () => {
+                setCurrentAccount("");
+                setTransactions([]);
+                setIsLoggedOut(true);
+
+            }
+
     useEffect(() =>{
         checkIfWalletIsConnected();
         checkIfTransactionExist();
          
-    },[transactionCount]);
+    },[]);
     
     return(
-        <TransactionConnect.Provider value={{connectMyWallet,currentAccount,formData,handleChange: (e, name) => setFormData({...formData, [name]: e.target.value}) ,sendTransaction,isLoading,transactions}}>{children}</TransactionConnect.Provider>
+        <TransactionConnect.Provider value={{connectMyWallet,currentAccount,formData,handleChange: (e, name) => setFormData({...formData, [name]: e.target.value}) ,sendTransaction,isLoading,transactions,setIsLoading,isLoggedOut,setIsLoggedOut,disconnectWallet}}>{children}</TransactionConnect.Provider>
     )
    };
 

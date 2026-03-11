@@ -1,11 +1,30 @@
-import React from 'react'
-import logo from "../../../assets/logo2.png"
+import React from 'react';
+import logo from "../../../assets/logo2.png";
+import { useContext } from 'react';
+import { TransactionConnect } from '../context/TransactionConnect';
+
 
 const NavBarItem = ({title}: {title: string})=>{
   return(
     <li className='mx-10 cursor-pointer font-family--apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'>{title}</li>
   )
 } 
+
+const {isLoggedOut} = useContext(TransactionConnect);
+const {disconnectWallet} = useContext(TransactionConnect);
+const {setIsLoggedOut} = useContext(TransactionConnect);
+const {connectMyWallet} = useContext(TransactionConnect);
+
+const handleLogout = () => {
+  disconnectWallet();
+}
+
+const handleLogin = () => {
+  setIsLoggedOut(false);
+  connectMyWallet();
+
+}
+
 
 const Navbar: React.FC = () => {
 
@@ -21,9 +40,17 @@ const Navbar: React.FC = () => {
           ))}
 
         </ul>
-        <button className="bg-blue-600 hover:bg-blue-900 text-white font-size-400 py-2 px-10 rounded-full ml-15 mr-20 cursor-pointer">
-          Login
-        </button>
+          {isLoggedOut ? (
+            <button type="button" onClick={handleLogin} className="flex flex-row justify-center items-center my-5 bg-[#2952e3] p-3 rounded-full cursor-pointer hover:bg-[#2546bd]">
+            Connect Wallet
+            </button>
+          ) : (
+            <button type="button" onClick={handleLogout} className="flex flex-row justify-center items-center my-5 bg-[#2952e3] p-3 rounded-full cursor-pointer hover:bg-[#2546bd]">
+            Logout
+            </button>
+          )}
+
+        
       </nav>
       
       
