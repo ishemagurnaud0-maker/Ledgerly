@@ -21,7 +21,7 @@ export const contractAbi = [
       { internalType: "string", name: "message", type: "string" },
       { internalType: "string", name: "keyword", type: "string" },
     ],
-    name: "addToBlockchain",
+    name: "addToBlockChain",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

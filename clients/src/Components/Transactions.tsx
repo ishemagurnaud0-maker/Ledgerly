@@ -32,7 +32,7 @@ const TransactionCard = ({
           target="_blank"
           rel="noopener noreferrer"
         >
-          From: {addressFrom.slice(0, 6)}...{addressFrom.slice(39, 42)}
+          From: {addressFrom.slice(0, 6)}...{addressFrom.slice(38, 42)}
         </a>
         <a
           className="text-white text-md mb-4"
@@ -40,7 +40,7 @@ const TransactionCard = ({
           target="_blank"
           rel="noopener noreferrer"
         >
-          To: {addressTo.slice(0, 6)}...{addressTo.slice(39, 42)}
+          To: {addressTo.slice(0, 6)}...{addressTo.slice(38, 42)}
         </a>
         <p className="text-white font-light text-sm">{message}</p>
         <img src={gifUrl || url} alt="gif" className="w-full h-auto rounded-md mt-2" />

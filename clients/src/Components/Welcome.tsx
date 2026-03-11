@@ -113,7 +113,7 @@ return (
                   </div>
                   <div>
                     <p className="text-white font-light text-sm">
-                      {currentAccount ? `${currentAccount.slice(0,6)}...${currentAccount.slice(39,42)}`: "Address"}
+                      {currentAccount ? `${currentAccount.slice(0,6)}...${currentAccount.slice(38,42)}`: "Address"}
                     </p>
                       <p className="text-white font-bold text-sm pd-1">
                         Ethereum

@@ -22,6 +22,8 @@ interface TransactionContextType{
     isLoggedOut: boolean;
     setIsLoggedOut: React.Dispatch<React.SetStateAction<boolean>>;
     disconnectWallet: () => void;
+    transactionCount:string;
+
     
 
 }
@@ -47,6 +49,20 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
         console.error("Error occurred while connecting to the contract",err);
         return;
     }
+   }
+
+
+   const getEthereumContractReadOnly = async(): Promise<ethers.Contract | undefined> => {
+
+    try{
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const transactionContract = new ethers.Contract(contractAddress,contractAbi,provider)
+
+        return transactionContract;
+    }catch(err){
+        console.error("Error occurred in accessing contract(READ-Only)",err);
+    }
+
    }
 
 
@@ -84,6 +100,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
                     message : transaction.message,
                     keyword : transaction.keyword,
                     amount : parseFloat(ethers.formatEther(transaction.amount)),
+                    url:'https://media.tenor.com/CW5l9EuXAUYAAAAM/nft-nfts.gif',
                 }))
                 console.log('Structured transactions:', structuredTransactions);
                 if(structuredTransactions.length === 0){
@@ -122,7 +139,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
             
             const checkIfTransactionExist = async() => {
                 try{
-                    const transactionContract = await getEthereumContract();
+                    const transactionContract = await getEthereumContractReadOnly();
                         if(transactionContract == null) throw new Error('Failed to connect to the contract instance.');
 
                     const transactionCount = await transactionContract.getTransactionCount();
@@ -176,6 +193,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
 
 
                     const transactionContract = await getEthereumContract();
+                    if(transactionContract == null) throw new Error('Failed to connect to the contract instance.');
                     const parsedAmount = ethers.parseEther(amount);
 
 
@@ -184,15 +202,15 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
                             params:[{
                                 from:currentAccount,
                                 to:addressTo,
-                                gas:'0x5208', //21000 Gwei
-                                value:parsedAmount.toString(16),
+                                gas:'0x5208', //21000 wei
+                                value: '0x'+ parsedAmount.toString(16),
                             }]
 
                         });
 
                         
 
-                        if(transactionContract == null) throw new Error('Failed to connect to the contract instance.');
+                        
                             setIsLoading(true);
                           const transactionHash = await transactionContract.addToBlockChain(addressTo,parsedAmount,message,keyword);
                           
@@ -241,13 +259,17 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
             }
 
     useEffect(() =>{
-        checkIfWalletIsConnected();
-        checkIfTransactionExist();
+        const init = async() => {
+           await checkIfWalletIsConnected();
+           await checkIfTransactionExist();
          
+        }
+        init();
+        
     },[]);
     
     return(
-        <TransactionConnect.Provider value={{connectMyWallet,currentAccount,formData,handleChange: (e, name) => setFormData({...formData, [name]: e.target.value}) ,sendTransaction,isLoading,transactions,setIsLoading,isLoggedOut,setIsLoggedOut,disconnectWallet}}>{children}</TransactionConnect.Provider>
+        <TransactionConnect.Provider value={{connectMyWallet,currentAccount,formData,handleChange: (e, name) => setFormData({...formData, [name]: e.target.value}) ,sendTransaction,isLoading,transactions,setIsLoading,isLoggedOut,setIsLoggedOut,disconnectWallet,transactionCount}}>{children}</TransactionConnect.Provider>
     )
    };
 
