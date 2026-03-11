@@ -96,7 +96,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
                 const structuredTransactions = availableTransactions.map((transaction:any) => ({
                     addressTo : transaction.receiver,
                     addressFrom : transaction.sender,
-                    timestamp : new Date(Number(transaction.timestamp* 1000)).toLocaleString(),
+                    timestamp : new Date(Number(transaction.timestamp)* 1000).toLocaleString(),
                     message : transaction.message,
                     keyword : transaction.keyword,
                     amount : parseFloat(ethers.formatEther(transaction.amount)),
@@ -110,7 +110,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
 
             } catch(err) {
                 console.error("Error occurred while fetching transactions:", err);
-                throw new Error("Failed to fetch transactions");
+                
             }
            } 
 
@@ -212,7 +212,7 @@ const getEthereumContract = async():Promise<ethers.Contract | undefined> =>{
 
                         
                             setIsLoading(true);
-                          const transactionHash = await transactionContract.addToBlockChain(addressTo,parsedAmount,message,keyword);
+                          const transactionHash = await transactionContract.addToBlockchain(addressTo,parsedAmount,message,keyword);
                           
                             console.log(`Loading - ${transactionHash.hash}`);
                           await transactionHash.wait();
